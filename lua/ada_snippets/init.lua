@@ -216,6 +216,140 @@ function M.set_standard(standard)
   indicator.set_indicator(active_standard)
 end
 
+--- Deep diagnostic: traces the full blink.cmp snippet pipeline.
+function M.debug_completions()
+  local lines = {}
+  local function add(fmt, ...) table.insert(lines, string.format(fmt, ...)) end
+
+  add("─ ada_snippets debug ──────────────────────")
+  add("standard: %s", active_standard)
+
+  -- 1. Our JSON
+  local json_paths = vim.api.nvim_get_runtime_file("snippets/ada.json", false)
+  if #json_paths == 0 then
+    add("ada.json: NOT FOUND on runtimepath")
+    add("Diagnosis: plugin install broken — add 'ada-snippets.nvim' to lazy.nvim")
+    print(table.concat(lines, "\n"))
+    return
+  end
+  add("ada.json: %s", json_paths[1])
+  local f = io.open(json_paths[1], "r")
+  if not f then
+    add("  ERROR: cannot read file")
+    print(table.concat(lines, "\n"))
+    return
+  end
+  local raw = f:read("*a")
+  f:close()
+  local ok, parsed = pcall(vim.json.decode, raw)
+  if not ok then
+    add("  ERROR: invalid JSON — %s", tostring(parsed))
+    print(table.concat(lines, "\n"))
+    return
+  end
+  add("  snippet count: %d", #vim.tbl_keys(parsed))
+
+  -- 2. blink.cmp
+  local blink_ok = pcall(require, "blink.cmp")
+  if not blink_ok then
+    add("blink.cmp: not installed")
+    add("Diagnosis: install blink.cmp or add LuaSnip")
+    print(table.concat(lines, "\n"))
+    return
+  end
+  add("blink.cmp: loaded")
+
+  -- 3. Config
+  local cfg_ok, cfg = pcall(require, "blink.cmp.config")
+  if not cfg_ok then
+    add("  WARN: blink.cmp.config unavailable")
+  else
+    local prov = cfg.sources and cfg.sources.providers
+    if prov and prov.snippets then
+      local opts = prov.snippets.opts
+      if opts and opts.search_paths then
+        add("  search_paths: %s", table.concat(opts.search_paths, ", "))
+      else
+        add("  search_paths: (not set)")
+      end
+    end
+    local enabled_sources = cfg.sources and cfg.sources.default
+    add("  default sources: %s", type(enabled_sources) == "table" and table.concat(enabled_sources, ", ") or tostring(enabled_sources))
+  end
+
+  -- 4. Snippets provider
+  local lib_ok, blink_sources = pcall(require, "blink.cmp.sources.lib")
+  if not lib_ok then
+    add("  sources.lib: not available (old blink.cmp version?)")
+    print(table.concat(lines, "\n"))
+    return
+  end
+  local provider = blink_sources.providers["snippets"]
+  if not provider then
+    add("  snippets provider: NOT INITIALIZED")
+    add("  Diagnosis: open an ada file and trigger completion once")
+    print(table.concat(lines, "\n"))
+    return
+  end
+  add("  snippets provider: initialized")
+
+  -- 5. Registry internals
+  local mod = provider.module
+  if not mod or not mod.registry then
+    add("  registry: NOT ACCESSIBLE")
+    print(table.concat(lines, "\n"))
+    return
+  end
+  local reg = mod.registry
+  add("  registry.search_paths: %s", table.concat(reg.config and reg.config.search_paths or {}, ", "))
+  add("  registry.filetypes: %s", table.concat(vim.tbl_keys(reg.registry or {}), ", "))
+
+  local ada_files = reg.registry and reg.registry["ada"]
+  if not ada_files then
+    add("  ada in registry: NO FILES")
+    add("  Diagnosis: scan didn't find ada.json — check that search_paths includes our snippets/ dir")
+    print(table.concat(lines, "\n"))
+    return
+  end
+  add("  ada files: %s", table.concat(ada_files, ", "))
+
+  -- 6. Try loading them
+  local utils_ok, utils = pcall(require, "blink.cmp.sources.snippets.utils")
+  for _, fp in ipairs(ada_files) do
+    local stat = vim.uv.fs_stat(fp)
+    if not stat then
+      add("  FILE MISSING: %s", fp)
+    else
+      local contents = utils_ok and utils.read_file(fp)
+      if contents then
+        local snips = utils.parse_json_with_error_msg(fp, contents)
+        add("  loaded %d snips from %s", #vim.tbl_keys(snips or {}), vim.fn.fnamemodify(fp, ":t"))
+      end
+    end
+  end
+
+  -- 7. Cache
+  if mod.cache then
+    local ada_cache = mod.cache["ada"]
+    if ada_cache then
+      add("  cached completions (ada): %d items", #ada_cache)
+      for _, item in ipairs(ada_cache) do
+        add("    %s → %s", item.label, item.description or "(no desc)")
+      end
+    else
+      add("  cached completions (ada): EMPTY (not yet populated)")
+      add("  Diagnosis: open an ada file and type a few chars to trigger completion")
+    end
+  end
+
+  -- 8. Omnifunc fallback
+  if vim.bo.filetype == "ada" then
+    add("  omnifunc: %s", vim.bo.omnifunc or "(not set)")
+  end
+
+  print(table.concat(lines, "\n"))
+end
+
 --- Print diagnostic info about the plugin state.
 function M.status()
   local lines = {}
