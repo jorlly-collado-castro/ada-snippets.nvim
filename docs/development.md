@@ -149,3 +149,31 @@ This project uses tracked Git hooks to enforce code quality. After cloning, conf
 ```bash
 git config core.hooksPath .githooks
 ```
+
+## Release Process
+
+The project follows Semantic Versioning and uses GitHub Actions to automate releases.
+
+To cut a new release:
+
+1. Create an annotated tag for the new version (e.g., `v1.0.0`):
+   ```bash
+   git tag -a v1.0.0 -m "Release v1.0.0"
+   ```
+2. Push the tag to GitHub:
+   ```bash
+   git push origin v1.0.0
+   ```
+
+The `release.yml` GitHub Actions workflow will automatically catch the tag push, draft a GitHub Release with auto-generated release notes (based on merged PRs/commits), and attach a clean `ada-snippets.nvim.zip` artifact containing only the runtime Lua and JSON files (excluding the Ada generator source and tooling).
+
+Lazy.nvim and other Neovim package managers handle standard Git tags natively out-of-the-box, allowing users to pin their configurations:
+
+```lua
+{
+  "jorlly-collado-castro/ada-snippets.nvim",
+  version = "*", -- or "v1.0.0" to pin
+  ft = "ada",
+  opts = { standard = "ada-2022" },
+}
+```

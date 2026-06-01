@@ -16,6 +16,9 @@ jobs:
       - name: Setup Alire
         uses: alire-project/setup-alire@v3
 
+      - name: Update Alire Index
+        run: alr index --update-all
+
       - name: Build Project
         working-directory: ./ada
         run: alr build

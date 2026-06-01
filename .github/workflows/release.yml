@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Clean Archive
+        run: |
+          # We only want to distribute the Neovim-specific files to users downloading the zip
+          zip -r ada-snippets.nvim.zip lua/ plugin/ snippets/ docs/ README.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ada-snippets.nvim.zip
+          generate_release_notes: true
