@@ -141,3 +141,11 @@ ada.expand("procedure body")  -- should expand proc template
   effects outside `setup()`
 - **JSON**: 2-space indentation, trailing comma allowed during
   generation but removed in committed file
+
+## Git Hooks
+
+This project uses tracked Git hooks to enforce code quality. After cloning, configure Git to use them:
+
+```bash
+git config core.hooksPath .githooks
+```
