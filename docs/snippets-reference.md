@@ -1,6 +1,6 @@
 # Snippets reference
 
-72 snippets organized by category. All snippets use LSP snippet
+74 snippets organized by category. All snippets use LSP snippet
 syntax for tab stops (`${1:default}`, `$0`, etc.) and support
 jumping between fields.
 
@@ -112,6 +112,7 @@ declarations. SPARK-only features.
 | `refined_global`   | Refined_Global aspect    | `  Refined_Global => (${1:In} => ${2:Var});`        | spark     |
 | `proof_in`         | Proof_In aspect          | `  Proof_In => (${1:Var});`                         | spark     |
 | `proof_out`        | Proof_Out aspect         | `  Proof_Out => (${1:Var});`                        | spark     |
+| `spark_mode`       | SPARK_Mode aspect        | `  SPARK_Mode => ${1:On};`                          | spark     |
 
 ## Contract aspects (Ada 2012+)
 
@@ -139,10 +140,11 @@ declarations. SPARK-only features.
 | `loop_invariant` | pragma Loop_Invariant   | `pragma Loop_Invariant (${1:Condition});`          | spark     |
 | `loop_variant`   | pragma Loop_Variant     | `pragma Loop_Variant (${1:Decreases} => ${2:Expr});` | spark     |
 
-## SPARK assertion pragmas
+## SPARK pragmas
 
 | Prefix                | Description             | Body                                                      | Standards |
 |-----------------------|-------------------------|-----------------------------------------------------------|-----------|
+| `pragma_spark_mode`   | pragma SPARK_Mode       | `pragma SPARK_Mode (${1:On});`                            | spark     |
 | `pragma_assume`       | pragma Assume           | `pragma Assume (${1:Condition});`                         | spark     |
 | `pragma_annotate`     | pragma Annotate         | `pragma Annotate (${1:Check}, ${2:Proof}, ${3:Message});` | spark     |
 | `pragma_check`        | pragma Check            | `pragma Check (${1:Name}, ${2:Condition});`               | spark     |
@@ -169,7 +171,7 @@ declarations. SPARK-only features.
 | `ada-2022`    | 54       | No SPARK-specific contracts/pragmas       |
 | `ada-2012`    | 49       | No SPARK, no Ada 2022 contracts           |
 | `ada-2005`    | 42       | No contracts, no SPARK, no Ada 2022       |
-| `spark`       | 66       | No task specs/bodies                      |
-| `spark-2014`  | 63       | No Ada 2022 contracts, no `parallel`      |
+| `spark`       | 68       | No task specs/bodies                      |
+| `spark-2014`  | 65       | No Ada 2022 contracts, no `parallel`      |
 | `jorvik`      | 43       | No SPARK, no contracts, no Ada 2022       |
 | `ravenscar`   | 40       | No SPARK, no contracts, no Ada.Text_IO    |

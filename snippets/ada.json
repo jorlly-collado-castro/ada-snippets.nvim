@@ -646,5 +646,23 @@
       "description": "pragma Assertion_Policy",
       "standards": ["ada-2022", "ada-2012", "spark", "spark-2014"],
       "with_units": []
+    },
+  "pragma SPARK_Mode":     {
+      "prefix": ["pragma_spark_mode"],
+      "body": [
+        "pragma SPARK_Mode (${1:On});"
+      ],
+      "description": "pragma SPARK_Mode",
+      "standards": ["spark", "spark-2014"],
+      "with_units": []
+    },
+  "SPARK_Mode aspect":     {
+      "prefix": ["spark_mode"],
+      "body": [
+        "  SPARK_Mode => ${1:On};"
+      ],
+      "description": "SPARK_Mode aspect",
+      "standards": ["spark", "spark-2014"],
+      "with_units": []
     }
 }

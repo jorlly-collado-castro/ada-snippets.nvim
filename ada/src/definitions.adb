@@ -446,6 +446,19 @@ package body Definitions is
              Body_Str    => +"pragma Assertion_Policy (${1:Check});",
              Description => +"pragma Assertion_Policy",
              Standards   => Ada_2012_And_Spark,
+             With_Units  => +""),
+          --  SPARK Mode
+          73 =>
+            (Prefix      => +"pragma_spark_mode",
+             Body_Str    => +"pragma SPARK_Mode (${1:On});",
+             Description => +"pragma SPARK_Mode",
+             Standards   => Spark_All,
+             With_Units  => +""),
+          74 =>
+            (Prefix      => +"spark_mode",
+             Body_Str    => +"  SPARK_Mode => ${1:On};",
+             Description => +"SPARK_Mode aspect",
+             Standards   => Spark_All,
              With_Units  => +""));
     end All_Snippets;
 
