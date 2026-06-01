@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Alire
+        uses: alire-project/setup-alire@v3
+
+      - name: Build Project
+        working-directory: ./ada
+        run: alr build
+
+      - name: Run AUnit Tests
+        working-directory: ./ada
+        run: ./bin/test_runner
+
+      - name: Run SPARK Prover
+        working-directory: ./ada
+        run: alr gnatprove
+
+      - name: Check JSON Synchronization
+        working-directory: ./ada
+        run: |
+          ./bin/gen_snippets > ../snippets/ada.json
+          if ! git diff --exit-code ../snippets/ada.json; then
+            echo "::error::snippets/ada.json is out of date! Please run the generator and commit the updated JSON."
+            exit 1
+          fi
