@@ -18,6 +18,14 @@ local function find_snippets_json()
   error("ada_snippets: snippets/ada.json not found on runtimepath")
 end
 
+--- Return the directory containing our ada.json.
+---@return string
+local function our_snippets_dir()
+  local files = vim.api.nvim_get_runtime_file("snippets/ada.json", false)
+  if #files == 0 then return nil end
+  return vim.fs.normalize(vim.fn.fnamemodify(files[1], ":h"))
+end
+
 --- Read and cache the raw JSON string.
 local json_cache = nil
 local function read_snippets_json()
@@ -101,9 +109,8 @@ local function register_blink()
   local ok = pcall(require, "blink.cmp")
   if not ok then return false end
 
-  local paths = vim.api.nvim_get_runtime_file("snippets", false)
-  if #paths == 0 then return false end
-  local our_dir = vim.fs.normalize(paths[1])
+  local our_dir = our_snippets_dir()
+  if not our_dir then return false end
 
   local ok_lib, src_lib = pcall(require, "blink.cmp.sources.lib")
   if not ok_lib then return false end
@@ -208,9 +215,8 @@ end
 
 --- Run blink.cmp injection interactively (for debugging).
 function M.test_blink_inject()
-  local paths = vim.api.nvim_get_runtime_file("snippets", false)
-  if #paths == 0 then print("snippets dir: NOT FOUND on runtimepath"); return end
-  local our_dir = vim.fs.normalize(paths[1])
+  local our_dir = our_snippets_dir()
+  if not our_dir then print("snippets/ada.json NOT FOUND on runtimepath"); return end
   print("our snippets dir:", our_dir)
 
   local ok = pcall(require, "blink.cmp")
