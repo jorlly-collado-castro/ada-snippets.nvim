@@ -2,38 +2,20 @@ local config = require("ada_snippets.config")
 
 local M = {}
 
-local ns_id = vim.api.nvim_create_namespace("ada_snippets_indicator")
-
-local function buf_is_ada(bufnr)
-  local ft = vim.api.nvim_buf_get_option(bufnr, "filetype")
-  return ft == "ada"
-end
-
---- Set the mode indicator extmark at the top of an Ada buffer.
----@param bufnr number
+--- Set the winbar indicator for an Ada buffer.
 ---@param standard string
-function M.set_indicator(bufnr, standard)
-  if not buf_is_ada(bufnr) then
+function M.set_indicator(standard)
+  if vim.bo.filetype ~= "ada" then
     return
   end
 
-  vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
-
   local info = config.get_info(standard)
-  local text = string.format(" %s (%s) ", info.label, info.iso)
-
-  vim.api.nvim_buf_set_extmark(bufnr, ns_id, 0, 0, {
-    virt_text = { { text, "Comment" } },
-    virt_text_pos = "overlay",
-    hl_mode = "combine",
-    priority = 200,
-  })
+  vim.wo.winbar = string.format(" %s (%s) ", info.label, info.iso)
 end
 
---- Clear the indicator for a buffer.
----@param bufnr number
-function M.clear_indicator(bufnr)
-  vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
+--- Clear the winbar indicator.
+function M.clear_indicator()
+  vim.wo.winbar = ""
 end
 
 --- Set up autocommands to manage the indicator across all Ada buffers.
@@ -41,19 +23,20 @@ end
 function M.setup(standard)
   local group = vim.api.nvim_create_augroup("ada_snippets_indicator", { clear = true })
 
-  vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
+  vim.api.nvim_create_autocmd("BufEnter", {
     group = group,
     pattern = "ada",
-    callback = function(args)
-      M.set_indicator(args.buf, standard)
+    callback = function()
+      M.set_indicator(standard)
     end,
   })
 
   vim.api.nvim_create_autocmd("BufLeave", {
     group = group,
-    pattern = "ada",
-    callback = function(args)
-      M.clear_indicator(args.buf)
+    callback = function()
+      if vim.bo.filetype == "ada" then
+        M.clear_indicator()
+      end
     end,
   })
 end

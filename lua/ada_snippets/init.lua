@@ -33,6 +33,37 @@ local function read_snippets_json()
   return json_cache
 end
 
+--- Auto-register snippets with available snippet engines.
+local function auto_register()
+  local ok_luasnip, luasnip_vscode = pcall(require, "luasnip.loaders.from_vscode")
+  if ok_luasnip then
+    local paths = vim.api.nvim_get_runtime_file("snippets", false)
+    if #paths > 0 then
+      luasnip_vscode.load({ paths = paths })
+    end
+    return
+  end
+
+  if vim.snippet.snippets then
+    local snippets = registry.filter(active_standard)
+    vim.snippet.snippets = vim.snippet.snippets or {}
+    vim.snippet.snippets.ada = vim.snippet.snippets.ada or {}
+    for _, snip in pairs(snippets) do
+      local prefix = snip.prefix
+      if type(prefix) == "table" then
+        prefix = prefix[1]
+      end
+      if prefix then
+        vim.snippet.snippets.ada[prefix] = {
+          prefix = snip.prefix,
+          body = snip.body,
+          description = snip.description,
+        }
+      end
+    end
+  end
+end
+
 ---@param opts? { standard: string }
 function M.setup(opts)
   opts = opts or {}
@@ -40,6 +71,7 @@ function M.setup(opts)
 
   registry.set_json_loader(read_snippets_json)
   indicator.setup(active_standard)
+  auto_register()
 end
 
 --- Return filtered snippet table for the active standard.
@@ -59,7 +91,7 @@ end
 function M.set_standard(standard)
   active_standard = config.validate(standard)
   registry.reset()
-  indicator.set_indicator(vim.api.nvim_get_current_buf(), active_standard)
+  indicator.set_indicator(active_standard)
 end
 
 --- Expand a snippet by key and auto-insert missing with clauses.
