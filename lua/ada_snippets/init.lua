@@ -91,7 +91,7 @@ end
 function M.set_standard(standard)
   active_standard = config.validate(standard)
   registry.reset()
-  indicator.set_indicator(active_standard)
+  indicator.set_indicator(vim.api.nvim_get_current_buf(), active_standard)
 end
 
 --- Expand a snippet by key and auto-insert missing with clauses.
