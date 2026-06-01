@@ -2,3 +2,4 @@ alire/
 bin/
 *.o
 *.ali
+obj/

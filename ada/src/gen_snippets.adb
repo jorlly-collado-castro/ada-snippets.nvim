@@ -1,6 +1,7 @@
 with Ada.Text_IO;   use Ada.Text_IO;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Definitions;   use Definitions;
+with Snippet_Utils;
 
 procedure Gen_Snippets is
 
@@ -10,20 +11,13 @@ procedure Gen_Snippets is
 
    function Escaped_JSON (S : String) return String is
       Result : String (1 .. S'Length * 2);
-      Len    : Natural := 0;
+      Last   : Natural;
    begin
-      for C of S loop
-         case C is
-            when '"'  => Len := Len + 2; Result (Len - 1) := '\'; Result (Len) := '"';
-            when '\'  => Len := Len + 2; Result (Len - 1) := '\'; Result (Len) := '\';
-            when ASCII.LF => Len := Len + 2; Result (Len - 1) := '\'; Result (Len) := 'n';
-            when ASCII.CR => null;
-            when others =>
-               Len := Len + 1;
-               Result (Len) := C;
-         end case;
-      end loop;
-      return Result (1 .. Len);
+      if S'Length = 0 then
+         return "";
+      end if;
+      Snippet_Utils.Escape_JSON (S, Result, Last);
+      return Result (1 .. Last);
    end Escaped_JSON;
 
    procedure Print_Snippet (S : Snippet_Record; Last : Boolean) is
@@ -34,21 +28,25 @@ procedure Gen_Snippets is
 
       --  Split body on \n and output JSON array
       declare
-          Body_Str : constant String := To_String (S.Body_Str);
-         Start_Pos : Positive := Body_Str'First;
+         Body_Str : constant String := To_String (S.Body_Str);
+         Current  : Positive := Body_Str'First;
+         NL_Idx   : Natural;
       begin
-         for I in Body_Str'Range loop
-            if Body_Str (I) = ASCII.LF then
-               Put ("        """ & Escaped_JSON (Body_Str (Start_Pos .. I - 1)) & """,");
+         loop
+            NL_Idx := Snippet_Utils.Find_Newline (Body_Str (Current .. Body_Str'Last));
+            if NL_Idx = 0 then
+               --  Last line (no trailing LF)
+               if Current <= Body_Str'Last then
+                  Put ("        """ & Escaped_JSON (Body_Str (Current .. Body_Str'Last)) & """");
+                  New_Line;
+               end if;
+               exit;
+            else
+               Put ("        """ & Escaped_JSON (Body_Str (Current .. NL_Idx - 1)) & """,");
                New_Line;
-               Start_Pos := I + 1;
+               Current := NL_Idx + 2; -- Skip the '\n'
             end if;
          end loop;
-         --  Last line (no trailing LF)
-         if Start_Pos <= Body_Str'Last then
-            Put ("        """ & Escaped_JSON (Body_Str (Start_Pos .. Body_Str'Last)) & """");
-            New_Line;
-         end if;
       end;
 
       Put_Line ("      ],");
