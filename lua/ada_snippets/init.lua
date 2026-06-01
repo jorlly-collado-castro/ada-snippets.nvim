@@ -6,6 +6,7 @@ local autowith = require("ada_snippets.autowith")
 local M = {}
 
 local active_standard = config.defaults.standard
+local has_blink = false
 
 --- Locate snippets/ada.json on the runtimepath.
 ---@return string
@@ -97,26 +98,59 @@ end
 
 --- Register snippets with blink.cmp by adding our path to its config.
 local function register_blink()
-  local ok, blink = pcall(require, "blink.cmp")
-  if not ok or not blink.config then
+  local ok = pcall(require, "blink.cmp")
+  if not ok then
     return false
   end
+
   local paths = vim.api.nvim_get_runtime_file("snippets", false)
   if #paths == 0 then
     return false
   end
+  local our_snippets_dir = vim.fs.normalize(paths[1])
 
-  blink.config.snippets = blink.config.snippets or {}
-  blink.config.snippets.vscode_snippet_paths = blink.config.snippets.vscode_snippet_paths or {}
-  table.insert(blink.config.snippets.vscode_snippet_paths, 1, paths[1])
+  local cfg = require("blink.cmp.config")
 
-  -- Reload blink.cmp's snippet list so the new path takes effect immediately.
-  pcall(function()
-    local snippets_mod = require("blink.cmp.sources.snippets")
-    if snippets_mod.load_vscode_snippets then
-      snippets_mod.load_vscode_snippets()
+  -- Add our path to the snippets provider opts so future
+  -- provider init picks it up automatically.
+  if cfg.sources and cfg.sources.providers and cfg.sources.providers.snippets then
+    local snippet_provider_cfg = cfg.sources.providers.snippets
+    snippet_provider_cfg.opts = snippet_provider_cfg.opts or {}
+    snippet_provider_cfg.opts.search_paths = snippet_provider_cfg.opts.search_paths or {}
+    local already = false
+    for _, p in ipairs(snippet_provider_cfg.opts.search_paths) do
+      if vim.fs.normalize(p) == our_snippets_dir then
+        already = true
+        break
+      end
     end
-  end)
+    if not already then
+      table.insert(snippet_provider_cfg.opts.search_paths, our_snippets_dir)
+    end
+  end
+
+  -- If the snippets provider is already initialized, we need to inject
+  -- our files into its internal registry and clear the completion cache.
+  local ok_lib, blink_sources = pcall(require, "blink.cmp.sources.lib")
+  if ok_lib then
+    local snippets_provider = blink_sources.providers["snippets"]
+    if snippets_provider and snippets_provider.module and snippets_provider.module.registry then
+      local reg = snippets_provider.module.registry
+      local ok_scan, scan = pcall(require, "blink.cmp.sources.snippets.default.scan")
+      if ok_scan then
+        local our_files = scan.register_snippets({ our_snippets_dir })
+        for ft, files in pairs(our_files) do
+          reg.registry[ft] = reg.registry[ft] or {}
+          vim.list_extend(reg.registry[ft], files)
+        end
+      end
+      if snippets_provider.module.reload then
+        snippets_provider.module:reload()
+      end
+    end
+  end
+
+  has_blink = true
   return true
 end
 
@@ -214,18 +248,7 @@ function M.status()
 
   local ok_blink = pcall(require, "blink.cmp")
   if ok_blink then
-    local our_path = vim.api.nvim_get_runtime_file("snippets", false)
-    local found = false
-    if #our_path > 0 and require("blink.cmp").config then
-      local paths = require("blink.cmp").config.snippets.vscode_snippet_paths or {}
-      for _, p in ipairs(paths) do
-        if p == our_path[1] then
-          found = true
-          break
-        end
-      end
-    end
-    table.insert(lines, "  blink.cmp: loaded" .. (found and " (our path configured)" or ""))
+    table.insert(lines, "  blink.cmp: loaded" .. (has_blink and " (our path configured)" or ""))
   else
     table.insert(lines, "  blink.cmp: not installed")
   end

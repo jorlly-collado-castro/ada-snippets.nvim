@@ -34,17 +34,13 @@ completion source (see blink.cmp and nvim-cmp below).
 
 ## blink.cmp
 
-blink.cmp has built-in snippet support. With the automatic LuaSnip
-registration in `setup()`, blink will pick up snippets if you
-configure its snippet source:
+The plugin automatically registers ada snippets with blink.cmp
+during `setup()`. No additional config is needed — the plugin adds
+`snippets/` to blink.cmp's `search_paths` so it's picked up by
+the default snippet preset.
 
-```lua
-require("blink.cmp").setup({
-  sources = {
-    default = { "lazy" },
-  },
-})
-```
+If LuaSnip is installed, `setup()` registers with LuaSnip first
+and blink.cmp's LuaSnip preset picks them up.
 
 ## nvim-cmp + LuaSnip
 
