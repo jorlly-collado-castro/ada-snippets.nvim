@@ -104,8 +104,9 @@ local function register_luasnip()
   return true
 end
 
---- Register snippets with blink.cmp.
+--- Register snippets with blink.cmp. Idempotent — safe to call multiple times.
 local function register_blink()
+  if has_blink then return true end
   local ok = pcall(require, "blink.cmp")
   if not ok then return false end
 
@@ -115,32 +116,48 @@ local function register_blink()
   local ok_lib, src_lib = pcall(require, "blink.cmp.sources.lib")
   if not ok_lib then return false end
 
-  -- Inject into the registry of the snippets provider.
-  -- If the provider hasn't been initialized yet, force-init it.
+  -- Get or force-init the snippets provider.
   local prov = src_lib.providers["snippets"]
       or src_lib.get_provider_by_id("snippets")
   if not prov or not prov.module then return false end
 
   local reg = prov.module.registry
-  -- reg is the blink.cmp.sources.snippets.default.registry instance
+  if not reg then return false end
 
-  -- Add our path to the registry's config so rescans pick it up.
+  -- Check whether we already injected (idempotency).
+  local already = false
   if reg.config then
-    reg.config.search_paths = reg.config.search_paths or {}
-    local found = false
-    for _, p in ipairs(reg.config.search_paths) do
-      if vim.fs.normalize(p) == our_dir then found = true; break end
+    for _, p in ipairs(reg.config.search_paths or {}) do
+      if vim.fs.normalize(p) == our_dir then already = true; break end
     end
-    if not found then table.insert(reg.config.search_paths, 1, our_dir) end
+  end
+  if already then
+    has_blink = true
+    return true
   end
 
-  -- Scan our dir and merge into the filetype -> file list mapping.
+  -- Add our path to the registry's search_paths.
+  reg.config.search_paths = reg.config.search_paths or {}
+  table.insert(reg.config.search_paths, 1, our_dir)
+
+  -- Scan our dir and merge files into the filetype registry.
   local ok_scan, scan = pcall(require, "blink.cmp.sources.snippets.default.scan")
   if ok_scan then
     local our_files = scan.register_snippets({ our_dir })
     for ft, files in pairs(our_files) do
-      reg.registry[ft] = reg.registry[ft] or {}
-      vim.list_extend(reg.registry[ft], files)
+      if not reg.registry[ft] then
+        reg.registry[ft] = files
+      else
+        -- Dedup merge: only add files not already present.
+        local existing = reg.registry[ft]
+        for _, f in ipairs(files) do
+          local dup = false
+          for _, e in ipairs(existing) do
+            if e == f then dup = true; break end
+          end
+          if not dup then table.insert(existing, f) end
+        end
+      end
     end
   end
 
