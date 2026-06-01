@@ -41,7 +41,11 @@ With lazy.nvim, pass via `opts`:
 - **All** standards include: procedure, function, package, if/case/loop,
   type/record/array, declare, exception, pragmas, subprogram declarations
 - **Ada 2022-only**: `parallel` loop and `parallel` block
-- **SPARK** (both variants): `requires` and `ensures` aspect snippets
+- **SPARK** (both variants): full contract aspects (`Depends`, `Global`,
+  `Proof_In`, `Proof_Out`), loop annotations, assertion pragmas,
+  ghost constructs, and Ada 2012+ contract aspects
+- **SPARK 2014**: everything in SPARK except Ada 2022 aspects
+  (`Always_Terminates`, `Exceptional_Cases`, `Subprogram_Variant`)
 - **Ravenscar**: restricted to profile-compatible snippets (no
   `Ada.Text_IO`, no `delay`, no `select`); includes `pragma Profile (Ravenscar)`
 - **Jorvik**: like Ravenscar but with the Jorvik profile pragma

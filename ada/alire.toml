@@ -1,11 +1,3 @@
-name = "ada-snippets"
+name = "ada_snippets"
 version = "0.1.0"
 description = "Ada snippets Neovim plugin - snippet definitions generator"
-
-[build-profiles]
-development = "debug"
-release = "release"
-
-[[executables]]
-kind = "development"
-executables = ["gen_snippets"]

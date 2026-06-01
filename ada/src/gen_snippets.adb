@@ -14,11 +14,9 @@ procedure Gen_Snippets is
    begin
       for C of S loop
          case C is
-            when '"'  => Len := Len + 2; Result (Len - 1 .. Len) := "\\\"";
-            when '\\' => Len := Len + 2; Result (Len - 1 .. Len) := "\\\\";
-            when '\n' => Len := Len + 2; Result (Len - 1 .. Len) := "\\n";
-            when '\t' => Len := Len + 2; Result (Len - 1 .. Len) := "\\t";
-            when ASCII.LF => Len := Len + 2; Result (Len - 1 .. Len) := "\\n";
+            when '"'  => Len := Len + 2; Result (Len - 1) := '\'; Result (Len) := '"';
+            when '\'  => Len := Len + 2; Result (Len - 1) := '\'; Result (Len) := '\';
+            when ASCII.LF => Len := Len + 2; Result (Len - 1) := '\'; Result (Len) := 'n';
             when ASCII.CR => null;
             when others =>
                Len := Len + 1;
@@ -36,7 +34,7 @@ procedure Gen_Snippets is
 
       --  Split body on \n and output JSON array
       declare
-         Body_Str : constant String := To_String (S.Body);
+          Body_Str : constant String := To_String (S.Body_Str);
          Start_Pos : Positive := Body_Str'First;
       begin
          for I in Body_Str'Range loop

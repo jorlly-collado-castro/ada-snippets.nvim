@@ -1,6 +1,6 @@
 # Snippets reference
 
-48 snippets organized by category. All snippets use LSP snippet
+72 snippets organized by category. All snippets use LSP snippet
 syntax for tab stops (`${1:default}`, `$0`, etc.) and support
 jumping between fields.
 
@@ -98,21 +98,78 @@ high-integrity profiles).
 | `ravenscar`      | pragma Profile (Ravenscar)      | `pragma Profile (Ravenscar);`                   | ravenscar     |
 | `jorvik`         | pragma Profile (Jorvik)         | `pragma Profile (Jorvik);`                      | jorvik        |
 
-## SPARK annotations
+## SPARK contract aspects (flow analysis)
 
-| Prefix  | Description                     | Body                    | Standards      |
-|---------|---------------------------------|-------------------------|----------------|
-| `req`   | SPARK precondition aspect       | `  ${1:Precondition};`  | spark, spark-2014 |
-| `ens`   | SPARK postcondition aspect      | `  ${1:Postcondition};` | spark, spark-2014 |
+Aspect specifications for the `with` clause on subprogram
+declarations. SPARK-only features.
+
+| Prefix             | Description              | Body                                                | Standards |
+|--------------------|--------------------------|-----------------------------------------------------|-----------|
+| `depends`          | Depends aspect           | `  Depends => (${1:Output} => ${2:Input});`         | spark     |
+| `global`           | Global aspect            | `  Global => (${1:In} => ${2:Var});`                | spark     |
+| `refined_state`    | Refined_State aspect     | `  Refined_State => (${1:State} => (${2:Concrete}));` | spark     |
+| `refined_depends`  | Refined_Depends aspect   | `  Refined_Depends => (${1:Output} => ${2:Input});` | spark     |
+| `refined_global`   | Refined_Global aspect    | `  Refined_Global => (${1:In} => ${2:Var});`        | spark     |
+| `proof_in`         | Proof_In aspect          | `  Proof_In => (${1:Var});`                         | spark     |
+| `proof_out`        | Proof_Out aspect         | `  Proof_Out => (${1:Var});`                        | spark     |
+
+## Contract aspects (Ada 2012+)
+
+| Prefix               | Description                 | Body                                                          | Standards      |
+|----------------------|-----------------------------|---------------------------------------------------------------|----------------|
+| `precondition`       | Precondition aspect         | `  Precondition => ${1:Condition};`                           | ada 2012+      |
+| `postcondition`      | Postcondition aspect        | `  Postcondition => ${1:Condition};`                          | ada 2012+      |
+| `contract_cases`     | Contract_Cases aspect       | `  Contract_Cases => (${1:Cond} => ${2:Post}, others => …);`  | ada 2012+      |
+| `type_invariant`     | Type_Invariant aspect       | `  Type_Invariant => ${1:Condition};`                         | ada 2012+      |
+| `predicate`          | Predicate aspect            | `  Predicate => ${1:Condition};`                              | ada 2012+      |
+| `dynamic_predicate`  | Dynamic_Predicate aspect    | `  Dynamic_Predicate => ${1:Condition};`                      | ada 2012+      |
+
+## Contract aspects (Ada 2022+)
+
+| Prefix                | Description                   | Body                                                        | Standards |
+|-----------------------|-------------------------------|-------------------------------------------------------------|-----------|
+| `exceptional_cases`   | Exceptional_Cases aspect      | `  Exceptional_Cases => (${1:E} => ${2:Postcondition});`    | ada 2022  |
+| `always_terminates`   | Always_Terminates aspect      | `  Always_Terminates => ${1:True};`                         | ada 2022  |
+| `subprogram_variant`  | Subprogram_Variant aspect     | `  Subprogram_Variant => (${1:Decreases} => ${2:Expr});`    | ada 2022  |
+
+## Loop annotations (SPARK)
+
+| Prefix           | Description             | Body                                               | Standards |
+|------------------|-------------------------|----------------------------------------------------|-----------|
+| `loop_invariant` | pragma Loop_Invariant   | `pragma Loop_Invariant (${1:Condition});`          | spark     |
+| `loop_variant`   | pragma Loop_Variant     | `pragma Loop_Variant (${1:Decreases} => ${2:Expr});` | spark     |
+
+## SPARK assertion pragmas
+
+| Prefix                | Description             | Body                                                      | Standards |
+|-----------------------|-------------------------|-----------------------------------------------------------|-----------|
+| `pragma_assume`       | pragma Assume           | `pragma Assume (${1:Condition});`                         | spark     |
+| `pragma_annotate`     | pragma Annotate         | `pragma Annotate (${1:Check}, ${2:Proof}, ${3:Message});` | spark     |
+| `pragma_check`        | pragma Check            | `pragma Check (${1:Name}, ${2:Condition});`               | spark     |
+
+## Ghost constructs (SPARK)
+
+| Prefix            | Description                  | Body                                                         | Standards |
+|-------------------|------------------------------|--------------------------------------------------------------|-----------|
+| `ghost_procedure` | Ghost procedure body         | `procedure ${1:Name} (${2:P} : ${3:T}) with Ghost is` …     | spark     |
+| `ghost_function`  | Ghost function body          | `function ${1:Name} (${2:P} : ${3:T}) return ${4:RT} ...`   | spark     |
+| `ghost_type`      | Ghost type                   | `type ${1:Name} is ${2:def} with Ghost;`                     | spark     |
+| `ghost_package`   | Ghost package specification  | `package ${1:Name} is with Ghost` …                          | spark     |
+
+## Assertion policy
+
+| Prefix                   | Description               | Body                                    | Standards |
+|--------------------------|---------------------------|-----------------------------------------|-----------|
+| `pragma_assertion_policy`| pragma Assertion_Policy   | `pragma Assertion_Policy (${1:Check});` | ada 2012+ |
 
 ## Snippet count by standard
 
 | Standard      | Snippets | Notable exclusions                        |
 |---------------|----------|-------------------------------------------|
-| `ada-2022`    | 48       | (full set)                                |
-| `ada-2012`    | 46       | No `parallel` constructs                  |
-| `ada-2005`    | 46       | No `parallel` constructs                  |
-| `spark`       | 47       | No task specs/bodies                      |
-| `spark-2014`  | 47       | No task specs/bodies                      |
-| `jorvik`      | 47       | No `Ada.Text_IO` snippets                 |
-| `ravenscar`   | 45       | No `Ada.Text_IO`, no task entries         |
+| `ada-2022`    | 54       | No SPARK-specific contracts/pragmas       |
+| `ada-2012`    | 49       | No SPARK, no Ada 2022 contracts           |
+| `ada-2005`    | 42       | No contracts, no SPARK, no Ada 2022       |
+| `spark`       | 66       | No task specs/bodies                      |
+| `spark-2014`  | 63       | No Ada 2022 contracts, no `parallel`      |
+| `jorvik`      | 43       | No SPARK, no contracts, no Ada 2022       |
+| `ravenscar`   | 40       | No SPARK, no contracts, no Ada.Text_IO    |
