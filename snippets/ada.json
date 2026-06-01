@@ -1,0 +1,338 @@
+{
+  "procedure body": {
+    "prefix": ["proc"],
+    "body": ["procedure ${1:Name} is", "  ${2}", "begin", "  ${3:-- body}", "end ${1:Name};"],
+    "description": "procedure body",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "procedure specification (declaration)": {
+    "prefix": ["procs"],
+    "body": ["procedure ${1:Name} (${2:Param} : ${3:Type});"],
+    "description": "procedure specification (declaration)",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "function body": {
+    "prefix": ["func"],
+    "body": ["function ${1:Name} (${2:Param} : ${3:Type}) return ${4:Return_Type}", "  ${5}", "begin", "  ${6:-- body}", "end ${1:Name};"],
+    "description": "function body",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "function specification (declaration)": {
+    "prefix": ["funcs"],
+    "body": ["function ${1:Name} (${2:Param} : ${3:Type}) return ${4:Return_Type};"],
+    "description": "function specification (declaration)",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "package specification": {
+    "prefix": ["pkg"],
+    "body": ["package ${1:Name} is", "  ${2}", "end ${1:Name};"],
+    "description": "package specification",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "package body": {
+    "prefix": ["pkgb"],
+    "body": ["package body ${1:Name} is", "  ${2}", "begin", "  ${3}", "end ${1:Name};"],
+    "description": "package body",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "task specification": {
+    "prefix": ["task"],
+    "body": ["task ${1:Name} is", "  ${2:-- entries}", "end ${1:Name};"],
+    "description": "task specification",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "task body": {
+    "prefix": ["taskb"],
+    "body": ["task body ${1:Name} is", "  ${2}", "begin", "  ${3:-- body}", "end ${1:Name};"],
+    "description": "task body",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "protected object specification": {
+    "prefix": ["prot"],
+    "body": ["protected ${1:Name} is", "  ${2:-- operations}", "end ${1:Name};"],
+    "description": "protected object specification",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "protected object body": {
+    "prefix": ["protb"],
+    "body": ["protected body ${1:Name} is", "  ${2}", "begin", "  ${3}", "end ${1:Name};"],
+    "description": "protected object body",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "with clause": {
+    "prefix": ["with"],
+    "body": ["with ${1:Unit};"],
+    "description": "with clause",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "use clause": {
+    "prefix": ["use"],
+    "body": ["use ${1:Unit};"],
+    "description": "use clause",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "if statement": {
+    "prefix": ["if"],
+    "body": ["if ${1:Condition} then", "  ${2}", "end if;"],
+    "description": "if statement",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "if/else statement": {
+    "prefix": ["ife"],
+    "body": ["if ${1:Condition} then", "  ${2}", "else", "  ${3}", "end if;"],
+    "description": "if/else statement",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "case statement": {
+    "prefix": ["case"],
+    "body": ["case ${1:Expression} is", "  when ${2:Choice} =>", "    ${3}", "end case;"],
+    "description": "case statement",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "basic loop": {
+    "prefix": ["loop"],
+    "body": ["loop", "  ${1}", "end loop;"],
+    "description": "basic loop",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "for loop": {
+    "prefix": ["for"],
+    "body": ["for ${1:Var} in ${2:Range} loop", "  ${3}", "end loop;"],
+    "description": "for loop",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "while loop": {
+    "prefix": ["while"],
+    "body": ["while ${1:Condition} loop", "  ${2}", "end loop;"],
+    "description": "while loop",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "type declaration": {
+    "prefix": ["type"],
+    "body": ["type ${1:Name} is ${2:definition};"],
+    "description": "type declaration",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "record type": {
+    "prefix": ["rec"],
+    "body": ["type ${1:Name} is record", "  ${2:Field} : ${3:Type};", "end record;"],
+    "description": "record type",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "array type": {
+    "prefix": ["arr"],
+    "body": ["type ${1:Name} is array (${2:Index}) of ${3:Component_Type};"],
+    "description": "array type",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "variable declaration": {
+    "prefix": ["var"],
+    "body": ["${1:Name} : ${2:Type}${3: := ${4:Default}};"],
+    "description": "variable declaration",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "constant declaration": {
+    "prefix": ["const"],
+    "body": ["${1:Name} : constant ${2:Type} := ${3:Value};"],
+    "description": "constant declaration",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "Put_Line statement": {
+    "prefix": ["putl"],
+    "body": ["Ada.Text_IO.Put_Line (${1:Item});"],
+    "description": "Put_Line statement",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik"],
+    "with_units": ["Ada.Text_IO"]
+  },
+  "Put statement": {
+    "prefix": ["put"],
+    "body": ["Ada.Text_IO.Put (${1:Item});"],
+    "description": "Put statement",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik"],
+    "with_units": ["Ada.Text_IO"]
+  },
+  "Get_Line statement": {
+    "prefix": ["getl"],
+    "body": ["Ada.Text_IO.Get_Line (${1:Item});"],
+    "description": "Get_Line statement",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik"],
+    "with_units": ["Ada.Text_IO"]
+  },
+  "generic package specification": {
+    "prefix": ["gen"],
+    "body": ["generic", "  type ${1:Formal} is private;", "package ${2:Name} is", "  ${3}", "end ${2:Name};"],
+    "description": "generic package specification",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "pragma line": {
+    "prefix": ["pragma"],
+    "body": ["pragma ${1:Name} (${2:Args});"],
+    "description": "pragma line",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "subprogram declaration": {
+    "prefix": ["subp"],
+    "body": ["${1:procedure | function} ${2:Name} (${3:Param} : ${4:Type})${5: return ${6:Return_Type}};"],
+    "description": "subprogram declaration",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "declare block": {
+    "prefix": ["declare"],
+    "body": ["declare", "  ${1:-- declarations}", "begin", "  ${2:-- body}", "end;"],
+    "description": "declare block",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "exception handler": {
+    "prefix": ["except"],
+    "body": ["exception", "  when ${1:Error} =>", "    ${2}"],
+    "description": "exception handler",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "SPARK precondition aspect": {
+    "prefix": ["req"],
+    "body": ["  ${1:Precondition};"],
+    "description": "SPARK precondition aspect",
+    "standards": ["spark", "spark-2014"],
+    "with_units": []
+  },
+  "SPARK postcondition aspect": {
+    "prefix": ["ens"],
+    "body": ["  ${1:Postcondition};"],
+    "description": "SPARK postcondition aspect",
+    "standards": ["spark", "spark-2014"],
+    "with_units": []
+  },
+  "parallel for loop (Ada 2022)": {
+    "prefix": ["par"],
+    "body": ["parallel for ${1:Var} in ${2:Range} loop", "  ${3}", "end loop;"],
+    "description": "parallel for loop (Ada 2022)",
+    "standards": ["ada-2022"],
+    "with_units": []
+  },
+  "parallel block (Ada 2022)": {
+    "prefix": ["parb"],
+    "body": ["parallel", "  ${1:-- parallel statements}", "end parallel;"],
+    "description": "parallel block (Ada 2022)",
+    "standards": ["ada-2022"],
+    "with_units": []
+  },
+  "subtype declaration": {
+    "prefix": ["subtype"],
+    "body": ["subtype ${1:Name} is ${2:Base_Type} range ${3:Limit};"],
+    "description": "subtype declaration",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "enumeration type": {
+    "prefix": ["enum"],
+    "body": ["type ${1:Name} is (${2:Element_1}, ${3:Element_2});"],
+    "description": "enumeration type",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "access type": {
+    "prefix": ["access"],
+    "body": ["type ${1:Name} is access ${2:Target_Type};"],
+    "description": "access type",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "fixed-point type": {
+    "prefix": ["delta"],
+    "body": ["type ${1:Name} is delta ${2:Delta} range ${3:Low} .. ${4:High};"],
+    "description": "fixed-point type",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "floating-point type": {
+    "prefix": ["digits"],
+    "body": ["type ${1:Name} is digits ${2:D} range ${3:Low} .. ${4:High};"],
+    "description": "floating-point type",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "renames declaration": {
+    "prefix": ["ren"],
+    "body": ["${1:Name} : ${2:Type} renames ${3:Original};"],
+    "description": "renames declaration",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "separate body stub": {
+    "prefix": ["separate"],
+    "body": ["separate (${1:Parent})", "  ${2}"],
+    "description": "separate body stub",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "pragma Elaborate": {
+    "prefix": ["elab"],
+    "body": ["pragma Elaborate (${1:Unit});"],
+    "description": "pragma Elaborate",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "Ravenscar profile pragma": {
+    "prefix": ["ravenscar"],
+    "body": ["pragma Profile (Ravenscar);"],
+    "description": "Ravenscar profile pragma",
+    "standards": ["ravenscar"],
+    "with_units": []
+  },
+  "Jorvik profile pragma": {
+    "prefix": ["jorvik"],
+    "body": ["pragma Profile (Jorvik);"],
+    "description": "Jorvik profile pragma",
+    "standards": ["jorvik"],
+    "with_units": []
+  },
+  "use type clause": {
+    "prefix": ["use_type"],
+    "body": ["use type ${1:Type};"],
+    "description": "use type clause",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "pragma Import": {
+    "prefix": ["pragma_import"],
+    "body": ["pragma Import (${1:Convention}, ${2:Entity}, ${3:\"External_Name\"});"],
+    "description": "pragma Import",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  },
+  "pragma Assert": {
+    "prefix": ["pragma_assert"],
+    "body": ["pragma Assert (${1:Condition});"],
+    "description": "pragma Assert",
+    "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+    "with_units": []
+  }
+}
