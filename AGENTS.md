@@ -9,12 +9,14 @@ snippets with auto-with insertion and a visible mode indicator.
 
 ```
 ada-snippets.nvim/
-├── lua/ada_snippets/        # Lua plugin source
-│   ├── init.lua             # Public API: setup(), expand(), get_filtered_snippets()
-│   ├── config.lua           # Standard schema, validation, ISO label mapping
-│   ├── registry.lua         # JSON loading, standard filtering, with_units lookup
-│   ├── indicator.lua        # Buffer-top virtual text extmark
-│   └── autowith.lua         # With-clause scanning and insertion
+├── lua/
+│   ├── ada-snippets.lua    # Module bridge (hyphen → underscore for lazy.nvim compat)
+│   └── ada_snippets/        # Lua plugin source
+│       ├── init.lua             # Public API: setup(), expand(), get_filtered_snippets()
+│       ├── config.lua           # Standard schema, validation, ISO label mapping
+│       ├── registry.lua         # JSON loading, standard filtering, with_units lookup
+│       ├── indicator.lua        # Buffer-top virtual text extmark
+│       └── autowith.lua         # With-clause scanning and insertion
 ├── ada/src/                 # Ada source (canonical snippet definitions)
 │   ├── definitions.ads      # Snippet type, Standard_Mask, masks constants
 │   ├── definitions.adb      # 48 Snippet_Record definitions (the source of truth)

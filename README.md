@@ -33,9 +33,10 @@ Minimal setup:
 {
   "jorlly-collado-castro/ada-snippets.nvim",
   ft = "ada",
-  opts = {
-    standard = "ada-2022",
-  },
+  opts = { standard = "ada-2022" },
+  config = function(_, opts)
+    require("ada_snippets").setup(opts)
+  end,
 }
 ```
 
@@ -168,12 +169,14 @@ Supported standards:
 
 ```
 ada-snippets.nvim/
-├── lua/ada_snippets/
-│   ├── init.lua        # Entry: setup(), get_filtered_snippets(), set_standard()
-│   ├── config.lua      # Standard schema, validation, ISO mapping
-│   ├── registry.lua    # Load & filter ada.json by standard
-│   ├── indicator.lua   # Buffer-top extmark showing active mode
-│   └── autowith.lua    # Auto-insert missing with clauses
+├── lua/
+│   ├── ada-snippets.lua   # Module bridge (hyphen → underscore for lazy.nvim compat)
+│   └── ada_snippets/
+│       ├── init.lua       # Entry: setup(), get_filtered_snippets(), set_standard()
+│       ├── config.lua     # Standard schema, validation, ISO mapping
+│       ├── registry.lua   # Load & filter ada.json by standard
+│       ├── indicator.lua  # Buffer-top extmark showing active mode
+│       └── autowith.lua   # Auto-insert missing with clauses
 ├── ada/src/
 │   ├── definitions.ads # Ada snippet records (canonical source of truth)
 │   ├── definitions.adb # 48 Ada snippet definitions
