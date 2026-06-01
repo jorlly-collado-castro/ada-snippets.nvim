@@ -1,8 +1,9 @@
 # Integration
 
 This plugin outputs filtered snippet tables in VSCode JSON format.
-How you consume them depends on your snippet engine and completion
-plugin.
+During `setup()`, snippets are automatically registered with
+LuaSnip (if installed), or with `vim.snippet.snippets` (Neovim 0.11+)
+as a fallback. No manual configuration is needed for basic completion.
 
 ## Available snippet source functions
 
@@ -33,37 +34,16 @@ completion source (see blink.cmp and nvim-cmp below).
 
 ## blink.cmp
 
-blink.cmp has built-in snippet support. Add the snippet source:
+blink.cmp has built-in snippet support. With the automatic LuaSnip
+registration in `setup()`, blink will pick up snippets if you
+configure its snippet source:
 
 ```lua
-sources = {
-  { name = "snippets", module = "blink.cmp.sources.snippets" },
-}
-```
-
-Then configure blink to find the ada_snippets JSON:
-
-```lua
--- In your blink.cmp setup:
 require("blink.cmp").setup({
   sources = {
-    default = { "snippets" },
-  },
-  snippets = {
-    vscode_snippet_paths = {
-      vim.fn.stdpath("data") .. "/site/lazy/ada-snippets.nvim/snippets",
-    },
+    default = { "lazy" },
   },
 })
-```
-
-Alternatively, use the Lua API:
-
-```lua
-local snippets = require("ada_snippets").get_filtered_snippets()
-for key, snip in pairs(snippets) do
-  -- register with blink's snippet source programmatically
-end
 ```
 
 ## nvim-cmp + LuaSnip
