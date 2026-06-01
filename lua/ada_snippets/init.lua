@@ -91,7 +91,52 @@ end
 function M.set_standard(standard)
   active_standard = config.validate(standard)
   registry.reset()
-  indicator.set_indicator(vim.api.nvim_get_current_buf(), active_standard)
+  indicator.set_indicator(active_standard)
+end
+
+--- Print diagnostic info about the plugin state.
+function M.status()
+  local lines = {}
+  table.insert(lines, "ada_snippets status:")
+  table.insert(lines, "  standard: " .. active_standard)
+
+  local path = vim.api.nvim_get_runtime_file("snippets/ada.json", false)
+  if #path > 0 then
+    table.insert(lines, "  ada.json: " .. path[1])
+  else
+    table.insert(lines, "  ada.json: NOT FOUND on runtimepath")
+  end
+
+  local ok_luasnip = pcall(require, "luasnip")
+  if ok_luasnip then
+    table.insert(lines, "  luasnip: loaded")
+    local snips = require("luasnip").get_snippets("ada")
+    if snips and next(snips) ~= nil then
+      local count = 0
+      for _ in pairs(snips) do
+        count = count + 1
+      end
+      table.insert(lines, "  luasnip ada snippets: " .. count)
+    else
+      table.insert(lines, "  luasnip ada snippets: NONE")
+    end
+  else
+    table.insert(lines, "  luasnip: not installed")
+  end
+
+  if vim.snippet.snippets then
+    local count = 0
+    if vim.snippet.snippets.ada then
+      for _ in pairs(vim.snippet.snippets.ada) do
+        count = count + 1
+      end
+    end
+    table.insert(lines, "  vim.snippet ada snippets: " .. count)
+  else
+    table.insert(lines, "  vim.snippet: not available")
+  end
+
+  print(table.concat(lines, "\n"))
 end
 
 --- Expand a snippet by key and auto-insert missing with clauses.
