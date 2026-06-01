@@ -8,8 +8,6 @@
 
 ## lazy.nvim (recommended)
 
-Minimal setup:
-
 ```lua
 {
   "jorlly-collado-castro/ada-snippets.nvim",
@@ -22,23 +20,8 @@ Minimal setup:
 
 This configures lazy.nvim to load the plugin only when opening
 `.ada` or `.ads` files, and passes the chosen Ada standard to
-`setup()`.
-
-If you use LuaSnip and want VSCode JSON loader integration:
-
-```lua
-{
-  "jorlly-collado-castro/ada-snippets.nvim",
-  ft = "ada",
-  opts = { standard = "spark" },
-  config = function(_, opts)
-    require("ada_snippets").setup(opts)
-    require("luasnip.loaders.from_vscode").load({
-      paths = vim.api.nvim_get_runtime_file("snippets", false),
-    })
-  end,
-}
-```
+`setup()`. Snippet registration happens automatically — no
+additional config is needed.
 
 ## vim-plug
 
@@ -66,10 +49,22 @@ use {
 
 ## Verifying the installation
 
-Open an Ada file and check:
+Open an Ada file and run:
 
-1. A mode indicator appears at line 0 (e.g. `Ada 2022 (ISO/IEC 8652:2023)`)
-2. `:lua print(vim.inspect(require("ada_snippets").get_standard()))`
-   prints your configured standard
-3. Your completion plugin offers snippet completions when you type
+```
+:lua require("ada_snippets").status()
+```
+
+Check:
+
+1. `ada.json` is found on the runtimepath
+2. **luasnip**, **blink.cmp**, or **vim.snippet** shows snippets registered
+3. Tip at the bottom suggests LuaSnip if not installed (optional)
+4. Your completion plugin offers snippet completions when you type
    `proc`, `putl`, `pkg`, etc.
+
+For deeper blink.cmp diagnostics:
+
+```
+:lua require("ada_snippets").debug_completions()
+```

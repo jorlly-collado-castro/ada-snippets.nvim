@@ -27,8 +27,6 @@ with auto-`with` insertion and a visible mode indicator.
 
 ### lazy.nvim (recommended)
 
-Minimal setup:
-
 ```lua
 {
   "jorlly-collado-castro/ada-snippets.nvim",
@@ -40,24 +38,8 @@ Minimal setup:
 ```
 
 This configures lazy.nvim to load the plugin only when opening
-`.ada` or `.ads` files, and passes the chosen Ada standard to
-`setup()`.
-
-If you use LuaSnip and want VSCode JSON loader integration:
-
-```lua
-{
-  "jorlly-collado-castro/ada-snippets.nvim",
-  ft = "ada",
-  opts = { standard = "spark" },
-  config = function(_, opts)
-    require("ada_snippets").setup(opts)
-    require("luasnip.loaders.from_vscode").load({
-      paths = vim.api.nvim_get_runtime_file("snippets", false),
-    })
-  end,
-}
-```
+`.ada` or `.ads` files. The plugin auto-registers snippets with
+LuaSnip, blink.cmp, or falls back to omnifunc — no extra config needed.
 
 ### vim-plug
 
@@ -87,11 +69,20 @@ use {
 
 Open an Ada file and check:
 
-1. A mode indicator appears at line 0 (e.g. `Ada 2022 (ISO/IEC 8652:2023)`)
-2. `:lua print(vim.inspect(require("ada_snippets").get_standard()))`
-   prints your configured standard
-3. Your completion plugin offers snippet completions when you type
+```
+:lua require("ada_snippets").status()
+```
+
+1. `ada.json` is found on the runtimepath
+2. Snippet engine shows registered snippets
+3. Your completion plugin offers completions when you type
    `proc`, `putl`, `pkg`, etc.
+
+For blink.cmp diagnostics:
+
+```
+:lua require("ada_snippets").debug_completions()
+```
 
 ## Configuration
 
@@ -203,15 +194,13 @@ alr build
 ## Integration with completion plugins
 
 ### blink.cmp
-```lua
-sources = {
-  { name = "snippets", module = "blink.cmp.sources.snippets" },
-}
-```
 
-### nvim-cmp + vim-vsnip / LuaSnip
+Auto-registered during `setup()`. No config needed. Run
+`:lua require("ada_snippets").debug_completions()` for diagnostics.
+
+### nvim-cmp + LuaSnip
+
 ```lua
--- LuaSnip loader for ada_snippets JSON
 require("luasnip.loaders.from_vscode").load({
   paths = vim.api.nvim_get_runtime_file("snippets", false),
 })

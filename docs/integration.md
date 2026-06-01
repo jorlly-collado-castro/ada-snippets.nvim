@@ -1,9 +1,14 @@
 # Integration
 
-This plugin outputs filtered snippet tables in VSCode JSON format.
-During `setup()`, snippets are automatically registered with
-LuaSnip (if installed), or with `vim.snippet.snippets` (Neovim 0.11+)
-as a fallback. No manual configuration is needed for basic completion.
+During `setup()`, snippets are automatically registered with the
+first available engine in this priority order:
+
+1. **LuaSnip** — via `luasnip.loaders.from_vscode`
+2. **blink.cmp** — via direct registry injection (default preset)
+3. **vim.snippet.snippets** (Neovim 0.11+)
+4. **omnifunc** — `<C-x><C-o>` fallback for Ada buffers
+
+No manual configuration is needed for basic completion.
 
 ## Available snippet source functions
 
@@ -19,38 +24,31 @@ local snippet = snippets["procedure body"]
 -- snippet.description => "procedure body"
 ```
 
-## vim.snippet (Neovim ≥ 0.10)
-
-`vim.snippet` handles expansion but does not provide completion
-sourcing. You need a completion plugin. The recommended path is to
-call `expand()` with the snippet key:
-
-```lua
-require("ada_snippets").expand("procedure body")
-```
-
-For completion integration, pipe the snippet table to your
-completion source (see blink.cmp and nvim-cmp below).
-
 ## blink.cmp
 
-The plugin automatically registers ada snippets with blink.cmp
-during `setup()`. No additional config is needed — the plugin adds
-`snippets/` to blink.cmp's `search_paths` so it's picked up by
-the default snippet preset.
+The plugin injects `snippets/ada.json` directly into blink.cmp's
+snippet registry during `setup()`. No additional config is needed.
 
 If LuaSnip is installed, `setup()` registers with LuaSnip first
-and blink.cmp's LuaSnip preset picks them up.
+and blink.cmp picks them up via its LuaSnip preset.
+
+### Diagnostics
+
+```lua
+:lua require("ada_snippets").debug_completions()
+```
+
+Traces the full blink.cmp pipeline: JSON validity, config state,
+provider initialization, registry file mapping, file I/O, and
+completion cache status.
 
 ## nvim-cmp + LuaSnip
 
 ```lua
--- Load the VSCode JSON via LuaSnip's loader
 require("luasnip.loaders.from_vscode").load({
   paths = vim.api.nvim_get_runtime_file("snippets", false),
 })
 
--- nvim-cmp then sources from LuaSnip as usual
 require("cmp").setup({
   snippet = {
     expand = function(args)
@@ -65,22 +63,9 @@ require("cmp").setup({
 
 ## nvim-cmp + vim-vsnip
 
-```lua
-require("cmp").setup({
-  snippet = {
-    expand = function(args)
-      vim.fn["vsnip#anonymous"](args.body)
-    end,
-  },
-  sources = {
-    { name = "vsnip" },
-  },
-})
-```
-
 vim-vsnip automatically picks up VSCode JSON files on the
-runtimepath, so the ada.json in the snippets directory should be
-found automatically.
+runtimepath, so `snippets/ada.json` is found automatically
+without additional configuration.
 
 ## LuaSnip (standalone, without nvim-cmp)
 
@@ -89,7 +74,6 @@ require("luasnip.loaders.from_vscode").load({
   paths = vim.api.nvim_get_runtime_file("snippets", false),
 })
 
--- Map tab to jump between nodes
 vim.keymap.set({ "i", "s" }, "<Tab>", function()
   if require("luasnip").expand_or_jumpable() then
     require("luasnip").expand_or_jump()
@@ -98,9 +82,6 @@ end, { silent = true })
 ```
 
 ## Using the expand helper (auto-with support)
-
-Regardless of your completion/snippet engine, call
-`ada_snippets.expand()` for auto-with support:
 
 ```lua
 -- In your completion plugin's confirm/select handler:
@@ -115,17 +96,12 @@ This:
 ## Accessing snippet metadata
 
 ```lua
--- Check what units a snippet would auto-with
 local units = require("ada_snippets.registry").get_with_units("Put_Line statement")
 -- => { "Ada.Text_IO" }
 ```
 
 ## Disabling the mode indicator
 
-The indicator can be disabled by overriding the setup:
-
 ```lua
-require("ada_snippets").setup({ standard = "ada-2022" })
--- The indicator is always set up; to remove it:
 vim.api.nvim_del_augroup_by_name("ada_snippets_indicator")
 ```
