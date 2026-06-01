@@ -96,37 +96,6 @@ local function register_luasnip()
   return true
 end
 
---- Inject our snippets dir into an already-initialized blink.cmp
---- snippets provider registry.
----@param provider blink.cmp.SourceProvider
-local function inject_into_provider(provider, our_snippets_dir)
-  local reg = provider.module and provider.module.registry
-  if not reg then return end
-
-  -- Add to registry's search_paths so rescans pick it up.
-  if reg.config then
-    reg.config.search_paths = reg.config.search_paths or {}
-    local already = false
-    for _, p in ipairs(reg.config.search_paths) do
-      if vim.fs.normalize(p) == our_snippets_dir then already = true; break end
-    end
-    if not already then table.insert(reg.config.search_paths, our_snippets_dir) end
-  end
-
-  -- Scan our directory and merge files into the filetype registry.
-  local ok_scan, scan = pcall(require, "blink.cmp.sources.snippets.default.scan")
-  if ok_scan then
-    local our_files = scan.register_snippets({ our_snippets_dir })
-    for ft, files in pairs(our_files) do
-      reg.registry[ft] = reg.registry[ft] or {}
-      vim.list_extend(reg.registry[ft], files)
-    end
-  end
-
-  -- Clear the completion cache so the new snippets are served next time.
-  if provider.module.reload then provider.module:reload() end
-end
-
 --- Register snippets with blink.cmp.
 local function register_blink()
   local ok = pcall(require, "blink.cmp")
@@ -139,43 +108,37 @@ local function register_blink()
   local ok_lib, src_lib = pcall(require, "blink.cmp.sources.lib")
   if not ok_lib then return false end
 
-    local cfg = require("blink.cmp.config")
-  local pcfg
-  if cfg.sources and cfg.sources.providers then
-    pcfg = cfg.sources.providers.snippets
-  end
-  vim.notify("ada_snippets blink: pcfg=" .. tostring(pcfg)
-    .. " has_provider=" .. tostring(src_lib.providers["snippets"] ~= nil),
-    vim.log.levels.INFO, { title = "ada_snippets" })
-
-  if pcfg then
-    pcfg.opts = pcfg.opts or {}
-    pcfg.opts.search_paths = pcfg.opts.search_paths or {}
-    vim.notify("ada_snippets blink: search_paths before="
-      .. table.concat(pcfg.opts.search_paths, ", "),
-      vim.log.levels.INFO, { title = "ada_snippets" })
-    local already = false
-    for _, p in ipairs(pcfg.opts.search_paths) do
-      if vim.fs.normalize(p) == our_dir then already = true; break end
-    end
-    if not already then
-      table.insert(pcfg.opts.search_paths, 1, our_dir)
-    end
-    vim.notify("ada_snippets blink: search_paths after="
-      .. table.concat(pcfg.opts.search_paths, ", "),
-      vim.log.levels.INFO, { title = "ada_snippets" })
-  end
-
-  -- Get or force-init the snippets provider.
+  -- Inject into the registry of the snippets provider.
+  -- If the provider hasn't been initialized yet, force-init it.
   local prov = src_lib.providers["snippets"]
       or src_lib.get_provider_by_id("snippets")
+  if not prov or not prov.module then return false end
 
-  if prov then
-    vim.notify("ada_snippets blink: provider=" .. tostring(prov)
-      .. " has_registry=" .. tostring(prov.module and prov.module.registry ~= nil),
-      vim.log.levels.INFO, { title = "ada_snippets" })
-    inject_into_provider(prov, our_dir)
+  local reg = prov.module.registry
+  -- reg is the blink.cmp.sources.snippets.default.registry instance
+
+  -- Add our path to the registry's config so rescans pick it up.
+  if reg.config then
+    reg.config.search_paths = reg.config.search_paths or {}
+    local found = false
+    for _, p in ipairs(reg.config.search_paths) do
+      if vim.fs.normalize(p) == our_dir then found = true; break end
+    end
+    if not found then table.insert(reg.config.search_paths, 1, our_dir) end
   end
+
+  -- Scan our dir and merge into the filetype -> file list mapping.
+  local ok_scan, scan = pcall(require, "blink.cmp.sources.snippets.default.scan")
+  if ok_scan then
+    local our_files = scan.register_snippets({ our_dir })
+    for ft, files in pairs(our_files) do
+      reg.registry[ft] = reg.registry[ft] or {}
+      vim.list_extend(reg.registry[ft], files)
+    end
+  end
+
+  -- Clear the completion cache so the new snippets are served next time.
+  if prov.module.reload then prov.module:reload() end
 
   has_blink = true
   return true
@@ -241,6 +204,72 @@ function M.set_standard(standard)
   active_standard = config.validate(standard)
   registry.reset()
   indicator.set_indicator(active_standard)
+end
+
+--- Run blink.cmp injection interactively (for debugging).
+function M.test_blink_inject()
+  local paths = vim.api.nvim_get_runtime_file("snippets", false)
+  if #paths == 0 then print("snippets dir: NOT FOUND on runtimepath"); return end
+  local our_dir = vim.fs.normalize(paths[1])
+  print("our snippets dir:", our_dir)
+
+  local ok = pcall(require, "blink.cmp")
+  print("blink.cmp loaded:", ok)
+  if not ok then return end
+
+  local ok_lib, src_lib = pcall(require, "blink.cmp.sources.lib")
+  print("sources.lib loaded:", ok_lib)
+  if not ok_lib then return end
+
+  local provider = src_lib.providers["snippets"]
+  print("provider exists:", provider ~= nil)
+  if not provider then
+    provider = src_lib.get_provider_by_id("snippets")
+    print("provider after force-init:", provider ~= nil)
+  end
+
+  if not provider then print("FAILED to get provider"); return end
+
+  local mod = provider.module
+  print("module:", mod ~= nil)
+  if not mod then return end
+
+  local reg = mod.registry
+  print("registry:", reg ~= nil)
+  if not reg then return end
+
+  print("reg.config:", reg.config ~= nil)
+  if reg.config then
+    print("reg.search_paths:", reg.config.search_paths and table.concat(reg.config.search_paths, ", ") or "nil")
+  end
+
+  print("reg.registry.ada before:", reg.registry and reg.registry["ada"] or "nil")
+
+  -- Try injecting
+  if reg.config then
+    reg.config.search_paths = reg.config.search_paths or {}
+    local found = false
+    for _, p in ipairs(reg.config.search_paths) do
+      if vim.fs.normalize(p) == our_dir then found = true; break end
+    end
+    if not found then table.insert(reg.config.search_paths, 1, our_dir) end
+    print("after injection, search_paths:", table.concat(reg.config.search_paths, ", "))
+  end
+
+  local ok_scan, scan = pcall(require, "blink.cmp.sources.snippets.default.scan")
+  print("scan loaded:", ok_scan)
+  if ok_scan then
+    local our_files = scan.register_snippets({ our_dir })
+    print("our_files keys:", table.concat(vim.tbl_keys(our_files), ", "))
+    for ft, files in pairs(our_files) do
+      reg.registry[ft] = reg.registry[ft] or {}
+      vim.list_extend(reg.registry[ft], files)
+      print(string.format("  %s: %s", ft, table.concat(files, ", ")))
+    end
+  end
+
+  print("reg.registry.ada after:", reg.registry and vim.inspect(reg.registry["ada"]))
+  if mod.reload then mod:reload(); print("cache cleared") end
 end
 
 --- Deep diagnostic: traces the full blink.cmp snippet pipeline.
