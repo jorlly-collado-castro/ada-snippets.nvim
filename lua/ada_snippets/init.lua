@@ -139,26 +139,43 @@ local function register_blink()
   local ok_lib, src_lib = pcall(require, "blink.cmp.sources.lib")
   if not ok_lib then return false end
 
-  -- Helper: get or force-initialize the snippets provider.
-  local function provider()
-    if src_lib.providers["snippets"] then return src_lib.providers["snippets"] end
-    -- Ensure our path is in config before provider init reads it.
     local cfg = require("blink.cmp.config")
-    local pcfg = cfg.sources and cfg.sources.providers and cfg.sources.providers.snippets
-    if pcfg then
-      pcfg.opts = pcfg.opts or {}
-      pcfg.opts.search_paths = pcfg.opts.search_paths or {}
-      local already = false
-      for _, p in ipairs(pcfg.opts.search_paths) do
-        if vim.fs.normalize(p) == our_dir then already = true; break end
-      end
-      if not already then table.insert(pcfg.opts.search_paths, our_dir) end
+  local pcfg
+  if cfg.sources and cfg.sources.providers then
+    pcfg = cfg.sources.providers.snippets
+  end
+  vim.notify("ada_snippets blink: pcfg=" .. tostring(pcfg)
+    .. " has_provider=" .. tostring(src_lib.providers["snippets"] ~= nil),
+    vim.log.levels.INFO, { title = "ada_snippets" })
+
+  if pcfg then
+    pcfg.opts = pcfg.opts or {}
+    pcfg.opts.search_paths = pcfg.opts.search_paths or {}
+    vim.notify("ada_snippets blink: search_paths before="
+      .. table.concat(pcfg.opts.search_paths, ", "),
+      vim.log.levels.INFO, { title = "ada_snippets" })
+    local already = false
+    for _, p in ipairs(pcfg.opts.search_paths) do
+      if vim.fs.normalize(p) == our_dir then already = true; break end
     end
-    return src_lib.get_provider_by_id("snippets")
+    if not already then
+      table.insert(pcfg.opts.search_paths, 1, our_dir)
+    end
+    vim.notify("ada_snippets blink: search_paths after="
+      .. table.concat(pcfg.opts.search_paths, ", "),
+      vim.log.levels.INFO, { title = "ada_snippets" })
   end
 
-  local prov = provider()
-  if prov then inject_into_provider(prov, our_dir) end
+  -- Get or force-init the snippets provider.
+  local prov = src_lib.providers["snippets"]
+      or src_lib.get_provider_by_id("snippets")
+
+  if prov then
+    vim.notify("ada_snippets blink: provider=" .. tostring(prov)
+      .. " has_registry=" .. tostring(prov.module and prov.module.registry ~= nil),
+      vim.log.levels.INFO, { title = "ada_snippets" })
+    inject_into_provider(prov, our_dir)
+  end
 
   has_blink = true
   return true
