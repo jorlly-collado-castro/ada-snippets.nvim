@@ -14,10 +14,9 @@ Minimal setup:
 {
   "jorlly-collado-castro/ada-snippets.nvim",
   ft = "ada",
-  opts = { standard = "ada-2022" },
-  config = function(_, opts)
-    require("ada_snippets").setup(opts)
-  end,
+  opts = {
+    standard = "ada-2022",
+  },
 }
 ```
 
