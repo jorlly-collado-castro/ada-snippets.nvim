@@ -1,6 +1,9 @@
-alire/
+
 bin/
 *.o
 *.ali
 obj/
 config/
+alire/build_hash_inputs
+alire/settings.toml
+alire/flags/

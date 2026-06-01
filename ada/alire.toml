@@ -3,7 +3,7 @@ version = "0.1.0"
 description = "Ada snippets Neovim plugin - snippet definitions generator"
 
 [[depends-on]]
-aunit = "^26.0.0"
+aunit = "*"
 
 [[depends-on]]
-gnatprove = "^15.1.0"
+gnatprove = "*"
