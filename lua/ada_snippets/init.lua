@@ -33,35 +33,123 @@ local function read_snippets_json()
   return json_cache
 end
 
---- Auto-register snippets with available snippet engines.
-local function auto_register()
-  local ok_luasnip, luasnip_vscode = pcall(require, "luasnip.loaders.from_vscode")
-  if ok_luasnip then
-    local paths = vim.api.nvim_get_runtime_file("snippets", false)
-    if #paths > 0 then
-      luasnip_vscode.load({ paths = paths })
+--- Omni-completion function for snippet triggers.
+--- Use via `<C-x><C-o>` or by configuring your completion plugin to
+--- source from the omnifunc.
+local function omnifunc(findstart, base)
+  if findstart == 1 then
+    local line = vim.api.nvim_get_current_line()
+    local col = vim.api.nvim_win_get_cursor(0)[2]
+    local start = col
+    while start > 0 and line:sub(start, start):match("[%w_]") do
+      start = start - 1
     end
-    return
+    return start
   end
 
-  if vim.snippet.snippets then
-    local snippets = registry.filter(active_standard)
-    vim.snippet.snippets = vim.snippet.snippets or {}
-    vim.snippet.snippets.ada = vim.snippet.snippets.ada or {}
-    for _, snip in pairs(snippets) do
-      local prefix = snip.prefix
-      if type(prefix) == "table" then
-        prefix = prefix[1]
-      end
-      if prefix then
-        vim.snippet.snippets.ada[prefix] = {
-          prefix = snip.prefix,
-          body = snip.body,
-          description = snip.description,
-        }
+  local snippets = registry.filter(active_standard)
+  local matches = {}
+  for _, snip in pairs(snippets) do
+    local prefix = snip.prefix
+    if type(prefix) == "table" then
+      prefix = prefix[1]
+    end
+    if prefix then
+      if base == "" or prefix:lower():find(base:lower(), 1, true) == 1 then
+        table.insert(matches, {
+          word = prefix,
+          abbr = snip.description,
+          menu = "[ada]",
+          info = snip.description,
+          icase = 1,
+          dup = 1,
+        })
       end
     end
   end
+  return matches
+end
+
+--- Set omnifunc for Ada buffers so `<C-x><C-o>` shows snippet completions.
+local function set_omnifunc()
+  local group = vim.api.nvim_create_augroup("ada_snippets_omnifunc", { clear = true })
+  vim.api.nvim_create_autocmd("FileType", {
+    group = group,
+    pattern = "ada",
+    callback = function(args)
+      vim.bo[args.buf].omnifunc = "v:lua.require('ada_snippets')._omnifunc"
+    end,
+  })
+end
+
+--- Register snippets with LuaSnip.
+local function register_luasnip()
+  local ok, loader = pcall(require, "luasnip.loaders.from_vscode")
+  if not ok then
+    return false
+  end
+  local paths = vim.api.nvim_get_runtime_file("snippets", false)
+  if #paths > 0 then
+    loader.load({ paths = paths })
+  end
+  return true
+end
+
+--- Register snippets with blink.cmp by adding our path to its config.
+local function register_blink()
+  local ok, blink = pcall(require, "blink.cmp")
+  if not ok or not blink.config then
+    return false
+  end
+  local paths = vim.api.nvim_get_runtime_file("snippets", false)
+  if #paths == 0 then
+    return false
+  end
+
+  blink.config.snippets = blink.config.snippets or {}
+  blink.config.snippets.vscode_snippet_paths = blink.config.snippets.vscode_snippet_paths or {}
+  table.insert(blink.config.snippets.vscode_snippet_paths, 1, paths[1])
+
+  -- Reload blink.cmp's snippet list so the new path takes effect immediately.
+  pcall(function()
+    local snippets_mod = require("blink.cmp.sources.snippets")
+    if snippets_mod.load_vscode_snippets then
+      snippets_mod.load_vscode_snippets()
+    end
+  end)
+  return true
+end
+
+--- Register snippets with vim.snippet (Neovim 0.11+).
+local function register_vim_snippet()
+  if not vim.snippet.snippets then
+    return false
+  end
+  local snippets = registry.filter(active_standard)
+  vim.snippet.snippets = vim.snippet.snippets or {}
+  vim.snippet.snippets.ada = vim.snippet.snippets.ada or {}
+  for _, snip in pairs(snippets) do
+    local prefix = snip.prefix
+    if type(prefix) == "table" then
+      prefix = prefix[1]
+    end
+    if prefix then
+      vim.snippet.snippets.ada[prefix] = {
+        prefix = snip.prefix,
+        body = snip.body,
+        description = snip.description,
+      }
+    end
+  end
+  return true
+end
+
+--- Auto-register snippets by trying engines in priority order.
+local function auto_register()
+  if register_luasnip() then return end
+  if register_blink() then return end
+  if register_vim_snippet() then return end
+  set_omnifunc()
 end
 
 ---@param opts? { standard: string }
@@ -116,12 +204,30 @@ function M.status()
       for _ in pairs(snips) do
         count = count + 1
       end
-      table.insert(lines, "  luasnip ada snippets: " .. count)
+      table.insert(lines, "  luasnip ada snippets: " .. count .. " (auto-registered)")
     else
       table.insert(lines, "  luasnip ada snippets: NONE")
     end
   else
     table.insert(lines, "  luasnip: not installed")
+  end
+
+  local ok_blink = pcall(require, "blink.cmp")
+  if ok_blink then
+    local our_path = vim.api.nvim_get_runtime_file("snippets", false)
+    local found = false
+    if #our_path > 0 and require("blink.cmp").config then
+      local paths = require("blink.cmp").config.snippets.vscode_snippet_paths or {}
+      for _, p in ipairs(paths) do
+        if p == our_path[1] then
+          found = true
+          break
+        end
+      end
+    end
+    table.insert(lines, "  blink.cmp: loaded" .. (found and " (our path configured)" or ""))
+  else
+    table.insert(lines, "  blink.cmp: not installed")
   end
 
   if vim.snippet.snippets then
@@ -136,8 +242,24 @@ function M.status()
     table.insert(lines, "  vim.snippet: not available")
   end
 
+  local ft = vim.bo.filetype
+  if ft == "ada" then
+    table.insert(lines, "")
+    table.insert(lines, "  omnifunc: " .. (vim.bo.omnifunc or "(not set)"))
+    table.insert(lines, "    <C-x><C-o> shows snippet completions")
+  end
+
+  if not ok_luasnip then
+    table.insert(lines, "")
+    table.insert(lines, "  Tip: Install LuaSnip for automatic snippet completions.")
+    table.insert(lines, "    { 'L3MON4D3/LuaSnip', version = 'v2.*' }")
+  end
+
   print(table.concat(lines, "\n"))
 end
+
+-- Expose omnifunc for v:lua.require('ada_snippets')._omnifunc
+M._omnifunc = omnifunc
 
 --- Expand a snippet by key and auto-insert missing with clauses.
 ---@param key string  The snippet description key (also used as snippet key)
