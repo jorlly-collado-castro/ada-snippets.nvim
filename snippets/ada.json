@@ -732,5 +732,23 @@
       "description": "SPARK_Mode aspect",
       "standards": ["spark", "spark-2014"],
       "with_units": []
+    },
+  "Increment variable":     {
+      "prefix": ["inc"],
+      "body": [
+        "${1:Var} := $1 + ${2:1};"
+      ],
+      "description": "Increment variable",
+      "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+      "with_units": []
+    },
+  "Decrement variable":     {
+      "prefix": ["dec"],
+      "body": [
+        "${1:Var} := $1 - ${2:1};"
+      ],
+      "description": "Decrement variable",
+      "standards": ["ada-2022", "ada-2012", "ada-2005", "spark", "spark-2014", "jorvik", "ravenscar"],
+      "with_units": []
     }
 }

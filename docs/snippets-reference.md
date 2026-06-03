@@ -59,12 +59,14 @@ jumping between fields.
 | `delta`  | fixed-point type                | `type ${1:Name} is delta ${2:D} range ${3:Low} .. ${4:High};`   |
 | `digits` | floating-point type             | `type ${1:Name} is digits ${2:D} range ${3:Low} .. ${4:High};`  |
 
-## Declarations
+## Declarations & Assignments
 
 | Prefix   | Description                     | Body                                                           |
 |----------|---------------------------------|----------------------------------------------------------------|
 | `var`    | variable declaration            | `${1:Name} : ${2:Type}${3: := ${4:Default}};`                   |
 | `const`  | constant declaration            | `${1:Name} : constant ${2:Type} := ${3:Value};`                 |
+| `inc`    | increment variable              | `${1:Var} := $1 + ${2:1};`                                      |
+| `dec`    | decrement variable              | `${1:Var} := $1 - ${2:1};`                                      |
 | `ren`    | renames declaration             | `${1:Name} : ${2:Type} renames ${3:Original};`                  |
 | `separate`| separate body stub             | `separate (${1:Parent})`                                       |
 

@@ -459,6 +459,18 @@ package body Definitions is
              Body_Str    => +"  SPARK_Mode => ${1:On};",
              Description => +"SPARK_Mode aspect",
              Standards   => Spark_All,
+             With_Units  => +""),
+          75 =>
+            (Prefix      => +"inc",
+             Body_Str    => +"${1:Var} := $1 + ${2:1};",
+             Description => +"Increment variable",
+             Standards   => All_Standards,
+             With_Units  => +""),
+          76 =>
+            (Prefix      => +"dec",
+             Body_Str    => +"${1:Var} := $1 - ${2:1};",
+             Description => +"Decrement variable",
+             Standards   => All_Standards,
              With_Units  => +""));
     end All_Snippets;
 

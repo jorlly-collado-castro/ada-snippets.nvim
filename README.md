@@ -129,6 +129,8 @@ Supported standards:
 | `arr`            | array type                         | all                    |
 | `var`            | variable declaration               | all                    |
 | `const`          | constant declaration               | all                    |
+| `inc`            | increment variable                 | all                    |
+| `dec`            | decrement variable                 | all                    |
 | `putl`           | Put_Line statement                 | all except Ravenscar   |
 | `put`            | Put statement                      | all except Ravenscar   |
 | `getl`           | Get_Line statement                 | all except Ravenscar   |
